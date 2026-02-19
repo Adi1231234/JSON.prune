@@ -57,10 +57,11 @@ array with too many elements | Truncation: `JSON.prune` applied to only the star
 
 By specifiying a `replacer` or a `prunedString` in `JSON.prune` options, you can customize those prunings.
 
-The `replacer` function takes 3 arguments:
+The `replacer` function takes 4 arguments:
 * the value to replace
 * the default replacement value
-* a boolean indicating whether the replacement is due to a cycle detection
+* a boolean indicating whether the replacement is due to a cycle detection (`true` for circular, `false` otherwise)
+* a string indicating the reason for pruning: `'circular'` for circular references, `'depth'` for max depth reached, or `undefined` for other cases (e.g. `undefined` values, functions, array truncation)
 
 Returning `undefined` makes `JSON.prune` ommit the property (name and value).
 
@@ -90,13 +91,16 @@ Note: You get the same behavior with
 
 ### Example 3: Verbose Pruning
 
-	var options = {replacer:function(value, defaultValue, circular){
-		if (circular) return '"-circular-"';
+	var options = {replacer:function(value, defaultValue, circular, reason){
+		if (reason === 'circular') return '"-circular-"';
+		if (reason === 'depth') return '"-too-deep-"';
 		if (value === undefined) return '"-undefined-"';
 		if (Array.isArray(value)) return '"-array('+value.length+')-"';
 		return defaultValue;
 	}};
 	var json = JSON.prune(obj, options);
+
+Note: the `circular` boolean (third argument) is kept for backward compatibility. The `reason` string (fourth argument) provides more granular information: `'circular'` for circular references, `'depth'` for max depth reached.
 
 ### Example 4: Function "serialization"
 

@@ -114,9 +114,10 @@
 				if (!value) {
 					return 'null';
 				}
-				if (depthDecr<=0 || seen.indexOf(value)!==-1) {
+				var isCircular = seen.indexOf(value)!==-1;
+				if (depthDecr<=0 || isCircular) {
 					if (replacer) {
-						var replacement = replacer(value, prunedString, true);
+						var replacement = replacer(value, prunedString, isCircular, isCircular ? 'circular' : 'depth');
 						return replacement===undefined ? undefined : ''+replacement;
 					}
 					return prunedString;
